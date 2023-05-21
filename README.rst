@@ -2,25 +2,41 @@
 easy-as-pypi
 @@@@@@@@@@@@
 
-.. .. image:: https://codecov.io/gh/pydob/easy-as-pypi/branch/develop/graph/badge.svg
-..   :target: https://codecov.io/gh/pydob/easy-as-pypi
-..   :alt: Coverage Status
-..
-.. .. image:: https://readthedocs.org/projects/easy-as-pypi/badge/?version=latest
-..   :target: https://easy-as-pypi.readthedocs.io/en/latest/
-..   :alt: Documentation Status
-..
-.. .. image:: https://img.shields.io/github/release/pydob/easy-as-pypi.svg?style=flat
-..   :target: https://github.com/pydob/easy-as-pypi/releases
-..   :alt: GitHub Release Status
-..
-.. .. image:: https://img.shields.io/pypi/v/easy-as-pypi.svg
-..   :target: https://pypi.org/project/easy-as-pypi/
-..   :alt: PyPI Release Status
+.. FIXME: Absorc change back to 'release' branch.
+
+.. CXREF: https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/adding-a-workflow-status-badge
+
+.. image:: https://github.com/pydob/easy-as-pypi/actions/workflows/checks.yaml/badge.svg?branch=ghactions
+  :target: https://github.com/pydob/easy-as-pypi/actions/workflows/checks.yaml/badge.svg?branch=ghactions
+  :alt: Build Status
+
+.. CXREF: https://app.codecov.io/github.com/pydob/easy-as-pypi/settings/badge
+
+.. image:: https://codecov.io/gh/pydob/easy-as-pypi/branch/ghactions/graph/badge.svg?token=AlKUyOgTGY
+  :target: https://codecov.io/gh/pydob/easy-as-pypi
+  :alt: Coverage Status
+
+.. image:: https://readthedocs.org/projects/easy-as-pypi/badge/?version=latest
+  :target: https://easy-as-pypi.readthedocs.io/en/latest/
+  :alt: Documentation Status
+
+.. image:: https://img.shields.io/github/release/pydob/easy-as-pypi.svg?style=flat
+  :target: https://github.com/pydob/easy-as-pypi/releases
+  :alt: GitHub Release Status
+
+.. image:: https://img.shields.io/pypi/v/easy-as-pypi.svg
+  :target: https://pypi.org/project/easy-as-pypi/
+  :alt: PyPI Release Status
+
+.. image:: https://img.shields.io/pypi/pyversions/easy-as-pypi.svg
+  :target: https://pypi.python.org/pypi/easy-as-pypi/
+  :alt: PyPI Supported Python Versions
 
 .. image:: https://img.shields.io/github/license/pydob/easy-as-pypi.svg?style=flat
   :target: https://github.com/pydob/easy-as-pypi/blob/release/LICENSE
   :alt: License Status
+
+|
 
 One dev's boilerplate PyPI project.
 
