@@ -10,13 +10,18 @@
 
 name: readthedocs/actions
 on:
+  # FIXME/2023-05-23: Why is this not running for me?
+  pull_request:
+  # FIXME/2023-05-23: Not safer "pull_request"? Then why not?
   pull_request_target:
-    types:
-      - opened
-      # Execute this action only on PRs that touch
-      # documentation files.
-      # paths:
-      - "docs/**"
+  # #
+  #   # types:
+  #   #   - opened
+  #   #   # Execute this action only on PRs that touch
+  #   #   # documentation files.
+  #   # paths:
+  #   #   - "**/*.rst"
+  #   #   - "docs/**"
 
 permissions:
   pull-requests: write
