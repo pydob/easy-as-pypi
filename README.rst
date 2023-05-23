@@ -91,3 +91,6 @@ projects themselves, as they won't need to be customized (such as
   or something, and not have to worry about merging changes manually
   (and running ``meld`` or something).
 
+.. TESTG/2023-05-23: Touching docs/ to verify GH Actions workflow.
+..
+
