@@ -2,6 +2,7 @@
 # Author: Landon Bouma <https://tallybark.com/>
 # Project: https://github.com/pydob/easy-as-pypi#🥧
 # License: MIT
+# yamllint disable rule:line-length
 
 # FIXME/2023-05-21: See 'isort:' job below, which uses new caching.
 # - Audit cache mechanism implemented by actions/setup-python@v4
@@ -23,6 +24,8 @@
 #         cache: 'poetry'
 #     - run: poetry install
 #     - run: poetry run pytest
+
+---
 
 # USYNC: The jobs below should include most of the same jobs as the
 #        Makefile 'lint' recipe and the tox.ini 'labels' setting.
@@ -429,7 +432,7 @@ jobs:
         # E.g.,
         #   run: poetry install -C ".pyproject-doc8/" --no-interaction --no-root --with dev
         run: poetry install -C "${{ env.PYPROJECT_DOC8_DIR }}" --no-interaction --no-root --with dev
-        #shell: bash
+        # shell: bash
 
       - name: Run doc8
         run: poetry run -C "${{ env.PYPROJECT_DOC8_DIR }}" python -m doc8 *.rst docs/
@@ -756,7 +759,7 @@ jobs:
           # - fail_ci_if_error: "Specify if CI pipeline should fail when
           #   Codecov runs into errors during upload"
           #   - Though unsure if fails just this job, or the whole workflow.
-          fail_ci_if_error: true # optional (default = false)
+          fail_ci_if_error: true  # optional (default = false)
           #  verbose: true # optional (default = false)
 
   yamllint:
