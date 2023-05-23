@@ -57,7 +57,6 @@ on:
   #               - pull_request, on the other hand, should prompt
   #                 project admins before they run checks, so that
   #                 you can vet the code first.
-  - pull_request
 
 # Cancel active pull_request workflow runs for the same branch.
 # - As inspired by Vim's .github/workflows/ci.yaml.
