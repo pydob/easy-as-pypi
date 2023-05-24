@@ -1,6 +1,6 @@
 ---
 
-# name: "Test if renaming workflow works"
+name: "Test if renaming workflow works #1"
 
 on:
   pull_request:
