@@ -8,7 +8,7 @@
 
 ---
 
-name: Add Readthedocs PR link
+name: Attach Readthedocs PR link
 
 on:
   # FIXME/2023-05-23: Why is this not running for me?

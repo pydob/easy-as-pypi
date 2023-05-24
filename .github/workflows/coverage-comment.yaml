@@ -7,7 +7,8 @@
 
 ---
 
-name: Prepare coverage comment
+# USYNC: coverage-comment-external.yaml on-workflows.
+name: "Attach PR coverage comment"
 
 on:
   pull_request:
@@ -64,19 +65,6 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ github.token }}
 
-      #   {
-      #     "outputs": {
-      #       "COMMENT_FILE_WRITTEN": "false"
-      #     },
-      #     "outcome": "success",
-      #     "conclusion": "success"
-      #   }
-      - name: Dump steps.coverage_comment
-        run: echo "${COVERAGE_COMMENT}"
-        shell: bash
-        env:
-          COVERAGE_COMMENT: ${{ toJson(steps.coverage_comment) }}
-
       # Per source, the comment file only written if previous step
       # failed to post coverage comment to PR, and is indicitave of
       # "external PR". (So if you're PRing from the same org, don't
@@ -90,7 +78,7 @@ jobs:
       #                   the other workflow works.
       # FIXME/2023-05-23: Rename this and/or other workflow. (other one: -fallback.yaml
       # or -external-PR.yaml)
-      # FIXME/2023-05-23: Change .yml to .yaml.
+      # FIXME/2023-05-23: Change all .yml to .yaml (Or yml, maybe I like yml).
       - name: Store Pull Request comment to be posted
         uses: actions/upload-artifact@v3
         if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
