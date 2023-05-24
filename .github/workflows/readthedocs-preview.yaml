@@ -6,23 +6,38 @@
 # CXREF: https://github.com/readthedocs/actions/tree/v1/preview
 #   https://github.com/readthedocs/actions
 
+# USAGE: Enable "Preview Documentation from Pull Requests" in RTFD project
+#   https://docs.readthedocs.io/en/latest/pull-requests.html
+# RTD > Settings > Advanced Settings > ✓ Build pull requests for this project
+#   https://readthedocs.org/dashboard/easy-as-pypi/advanced/
+# Note that you'll see 2 checks on the PR page, one for this workflow, and
+# one for the RTD build hook — this workflow merely adds the PR link.
+
 ---
 
-name: Add Readthedocs PR link
+name: Attach Readthedocs PR link
 
 on:
   # FIXME/2023-05-23: Why is this not running for me?
   pull_request:
+    types:
+      - opened
+      # Execute this action only on PRs that touch
+      # documentation files.
+    paths:
+      - "**/*.rst"
+      - "docs/**"
   # FIXME/2023-05-23: Not safer "pull_request"? Then why not?
   pull_request_target:
+  # FIXME:
   # #
-  #   # types:
-  #   #   - opened
-  #   #   # Execute this action only on PRs that touch
-  #   #   # documentation files.
-  #   # paths:
-  #   #   - "**/*.rst"
-  #   #   - "docs/**"
+    types:
+      - opened
+      # Execute this action only on PRs that touch
+      # documentation files.
+    paths:
+      - "**/*.rst"
+      - "docs/**"
 
 permissions:
   pull-requests: write
