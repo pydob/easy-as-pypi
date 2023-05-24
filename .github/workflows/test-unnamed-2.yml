@@ -1,0 +1,15 @@
+---
+
+name: "Test if renaming workflow works"
+
+on:
+  pull_request:
+
+jobs:
+
+  rename_me:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print I'm running
+        run: echo "I'm running"
