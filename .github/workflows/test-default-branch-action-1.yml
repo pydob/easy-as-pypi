@@ -12,8 +12,11 @@ on:
 
 jobs:
 
+  if: false
+
   testdefault:
     runs-on: ubuntu-latest
+    if: false
 
     steps:
       - name: Print I'm running
