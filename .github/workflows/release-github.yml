@@ -5,7 +5,7 @@
 
 ---
 
-name: Release Python package to GitHub
+name: Release first to GitHub
 on:
   push:
     tags:
@@ -41,6 +41,17 @@ jobs:
       - name: Print $TOKENTEST
         run: echo "$TOKENTEST"
         # shell: bash
+
+      - name: Announcement
+        run: echo "Processing version ${GITHUB_REF#refs/tags/}"
+        shell: bash
+
+      - name: Dump github context
+        run: echo "${GITHUB_CONTEXT}"
+        shell: bash
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
 
 # FIXME: Check that HEAD matches tag?
 

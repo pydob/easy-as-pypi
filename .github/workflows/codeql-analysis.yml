@@ -10,6 +10,8 @@
 
 name: "CodeQL Code Scanning"
 
+# MAYBE/2023-05-23: Don't run so much... how useful is this check?
+
 on:
   push:
     branches: [release]

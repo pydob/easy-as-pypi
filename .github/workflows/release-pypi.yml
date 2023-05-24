@@ -6,7 +6,7 @@
 
 ---
 
-name: Build and publish Python package to PyPI
+name: Release next to PyPI
 
 # The 'release' event sets:
 # - GITHUB_SHA — Last commit in the tagged release

@@ -7,15 +7,27 @@
 
 ---
 
-name: Post coverage comment
+name: Attach cov comment — External PR
 
 on:
   workflow_run:
-    workflows: ["Prepare coverage comment"]
+    # USYNC: coverage-comment.yaml name
+    workflows: ["Attach PR coverage comment"]
     types:
       - completed
 
 jobs:
+
+  blather:
+    name: Blather
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump github.event
+        run: echo "${GITHUB_EVENT}"
+        shell: bash
+        env:
+          GITHUB_EVENT: ${{ toJson(github.event) }}
+
   test:
     name: Run tests & display coverage
     runs-on: ubuntu-latest
