@@ -4,10 +4,10 @@ name: "Test if default_branch works"
 
 on:
   push:
-    branches: ["${{ github.event.repository.default_branch }}"]
+    branches: ${{ github.event.repository.default_branch }}
     # branches: [release]
   pull_request:
-    branches: ["${{ github.event.repository.default_branch }}"]
+    branches: ${{ github.event.repository.default_branch }}
     # branches: [release]
 
 jobs:
