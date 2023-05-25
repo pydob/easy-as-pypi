@@ -1,0 +1,100 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/pydob/easy-as-pypi#🥧
+# License: MIT
+
+---
+
+name: Run reversioning workflows
+
+on:
+  workflow_run:
+    # USYNC: release-pypi.yml name ↔ run-reversioning.yml on-workflow_run.
+    workflows: ["Publish release to PyPI"]
+    types:
+      - completed
+
+  workflow_dispatch:
+
+jobs:
+
+  blather:
+    name: Blather
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump github.event
+        run: echo "${GITHUB_EVENT}"
+        shell: bash
+        env:
+          GITHUB_EVENT: ${{ toJson(github.event) }}
+
+  run-reversioning:
+    name: Run reversioning workflows
+
+    runs-on: ubuntu-latest
+
+    if: |
+      (
+        github.event_name == 'workflow_dispatch'
+        || github.event.workflow_run.conclusion == 'success'
+      )
+
+    # permissions:
+    #   # Gives the action the necessary permissions for looking up the
+    #   # workflow that launched this workflow, and download the related
+    #   # artifact that contains the comment to be published
+    #   actions: read
+    #
+    # FIXME: Verify if necessary:
+    # permissions:
+    #   # So we can use `gh`.
+    #   actions: 'write'
+
+    # github.repository is, e.g.,"pydob/easy-as-pypi".
+
+    # strategy:
+    #   matrix:
+    #     # repo: ['my-org/repo1', 'my-org/repo2', 'my-org/repo3']
+    #     # repo: ['doblabs/easy-as-pypi-appdirs']
+    #     easy-as-pypi: ['doblabs/easy-as-pypi-appdirs']
+    #     easy-as-pypi-appdirs: ['foo', 'bar']
+
+    steps:
+      # - name: Dispatch remote repo workflows
+      #   run: |
+      #     case ${{ github.repository }} in
+      #       pydob/easy-as-pypi-appdirs)
+      #         echo "easy-as-pypi-config"
+      #         ;;
+      #         ;&
+      #       *)
+      #         ;;
+      #     esac
+      #     echo "gh workflow run update-pydob-dev.yml --repo $???"
+      #     gh workflow run update-pydob-dev.yml --repo $???
+
+      # ***
+
+      # CXREF: https://github.com/actions/checkout
+      - name: checkout
+        uses: actions/checkout@v3
+
+      # CXREF: https://github.com/marketplace/actions/yaml-read
+      - name: Read dependency config
+        uses: pietrobolcato/action-read-yaml@1.0.0
+        id: read_deps_js
+        with:
+          config: ${{ github.workspace }}/.github/doblabs-dependencies.yml
+
+      # CXREF: https://github.com/marketplace/actions/repository-dispatch
+      - name: Dispatch remote repo workflows
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          # Personal access token created for *my user* with public_repo permissions.
+          token: ${{ secrets.PAT__PUBLIC_REPO }}
+          # repository: doblabs/easy-as-pypi-appdirs
+          # repository: ${{ matrix.XXXXXX }}
+          repository: "${{ steps.read_deps_js.outputs['${{ github.repository }}'] }}"
+          event-type: update-org-deps
+          # FIXME: Probably don't need:
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'

@@ -6,7 +6,8 @@
 
 ---
 
-name: Release next to PyPI
+# USYNC: release-pypi.yml name ↔ run-reversioning.yml on-workflow_run.
+name: Publish release to PyPI
 
 # The 'release' event sets:
 # - GITHUB_SHA — Last commit in the tagged release
@@ -40,96 +41,85 @@ on:
   release:
     types: [published]
 
+  # FIXME: For now, at least while developing this workflow.
+  workflow_dispatch:
+
 env:
   # USYNC: https://github.com/actions/python-versions/releases
   # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
   PYTHON_VERSION: 3.11
 
 jobs:
-
-  poetry-publish:
+  blather:
+    name: Blather
     runs-on: ubuntu-latest
-
     steps:
-      - name: Curious about ubuntu-latest PI
-        run: |
-          type -a python || true
-          python --version || true
-          type -a poetry || true
-          poetry --version || true
-        shell: bash
-
-      # CXREF: https://github.com/actions/checkout
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        # Checkout the default branch and ensure it's what was released.
-        # - (Either an edge case, or shouldn't happen, but prevents at
-        #   least two weird states: User tags a commit that was previously
-        #   released; or user starts a new release while previous release
-        #   still running. In either case, probably being too paranoid.)
-        ref: ${{ github.event.repository.default_branch }}
-
       - name: Print vars and environs
         run: |
           echo "GITHUB_SHA: $GITHUB_SHA"
           echo "GITHUB_REF: $GITHUB_REF"
           echo "github.ref: ${{ github.ref }}"
 
-      # Compare default branch HEAD and workflow event GITHUB_SHA.
-      - name: Verify default branch HEAD is what was released
-        run: '[ "$GITHUB_SHA" = "$(git rev-parse HEAD)" ] || exit 1'
-        # if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
-        # shell: bash
+      - name: Dump github context
+        run: echo "${GITHUB_CONTEXT}"
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
+  poetry-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Probe version (not workflow_dispatch)
+        run: echo "VERSION_TAG=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
+        shell: bash
+        if: github.event_name != 'workflow_dispatch'
+
+      - name: Checkout repository (not workflow_dispatch)
+        uses: actions/checkout@v3
+        if: github.event_name != 'workflow_dispatch'
+
+      - name: Checkout repository (is workflow_dispatch)
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          # Fetch all history, so rev-parse HEAD is real HEAD.
+          # MAYBE: This could be slow on big repos, and is only
+          # necessary for a paranoid check, so could be disabled.
+          fetch-depth: 0
+        if: github.event_name == 'workflow_dispatch'
+
+      - name: Probe version (is workflow_dispatch)
+        run: echo "VERSION_TAG=$(git tag --points-at HEAD)" >> "$GITHUB_ENV"
+        if: github.event_name == 'workflow_dispatch'
+
+      # MEH: We could get highest version tag...
+      #   ~/.kit/sh/sh-git-nubs/bin/git-nubs.sh
+      #     git_latest_version_tag
+      - name: Fail if VERSION_TAG undiscoverable
+        run: exit 1
+        if: env.VERSION_TAG == ''
 
       # Print release tag, mostly out of curiosity.
       # - MEH: Is there anything about the tag to verify?
       #   - The author assumes the SHA for the tag is GITHUB_SHA.
       - name: Announcement
-        run: echo "Pushing version ${GITHUB_REF#refs/tags/} to PyPI"
-        shell: bash
+        run: echo "Pushing $VERSION_TAG to PyPI"
 
-      # FIXME/2023-05-23: Copied from isort job: How does pipx work
-      #                   before installing Python? (I copied the pipx
-      #                   from third-party and I think it came before
-      #                   Python setup, too...)
-      # - It might by that ubuntu-latest includes Python and pipx,
-      #   and that, oh, pipx uses its own environment to install
-      #   systemwide. Then setup-python creates a virtualenv...
-      #   and then we're probably running system poetry later,
-      #   too...
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Curious about ubuntu-latest PII
+      - name: Download release
         run: |
-          type -a python || true
-          python --version || true
-          type -a poetry || true
-          poetry --version || true
-        shell: bash
+          echo "gh release download \"$VERSION_TAG\" -D dist/"
+          gh release download "$VERSION_TAG" -D dist/
+        env:
+          GH_TOKEN: ${{ github.token }}
 
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        id: setup-python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'poetry'
-
-      - name: Curious about ubuntu-latest PIII
+      - name: Inspect work
         run: |
-          type -a python || true
-          python --version || true
-          type -a poetry || true
-          poetry --version || true
-        shell: bash
-
-      # # Do I need to build or install?
-      #
-      # - name: Install package
-      #   run: poetry install --no-interaction
-      #
-      # - name: Build distributable
-      #   run: poetry build
+          echo
+          echo ./
+          ls -la
+          echo
+          echo dist/
+          ls -la dist/
 
       # CXREF: https://python-poetry.org/docs/repositories/
       - name: Poetry build and publish package
@@ -139,6 +129,86 @@ jobs:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
         run: |
           #  poetry config pypi-token.pypi $PYPI_TOKEN
-          poetry publish --build
+          # poetry publish --build
+          poetry publish
         # FIXME/2023-05-23: Unblock this eventually...
         if: false
+
+  # ***
+
+  smoke-test:
+    name: Smoke test PyPI release
+
+    runs-on: ubuntu-latest
+
+    needs: poetry-publish
+
+    # FIXME: Guessing we need this?
+    # - FIXME: And probably need to let first job succeed if package
+    # already published, so we can pick up at smoke-testing and then
+    # send reversioning runs.
+    #
+    # if: ${{ needs.poetry-publish.conclusion == 'success' }}
+
+    steps:
+      - name: Print vars and environs
+        run: |
+          echo "VERSION_TAG: $VERSION_TAG"
+
+      - name: Dump needs.poetry-publish
+        run: echo "${JSON_DUMP}"
+        shell: bash
+        env:
+          JSON_DUMP: ${{ toJson(needs.poetry-publish) }}
+
+      # ***
+
+      # github.repository is, e.g.,"pydob/easy-as-pypi".
+      - name: Probe version
+        run: echo "PACKAGE_NAME=$(basename ${{ github.repository }})" >> "$GITHUB_ENV"
+        shell: bash
+
+      # Wait for PyPI to get package ready.
+      # - name: Sleep for 30 seconds
+      #   run: sleep 30s
+      #   shell: bash
+
+      - name: Install package
+        run: pipx install $PACKAGE_NAME
+
+      - name: Run it!
+        run: |
+          echo $PACKAGE_NAME version
+          $PACKAGE_NAME version
+          echo "Expecting version: ${RELEASE_TAG#v}"
+        shell: bash
+
+      # FIXME/2023-05-25: Have prev. workflow leave tag RELEASE_TAG, and compare it.
+      - name: Check version
+        run: |
+          [ "$($PACKAGE_NAME version)" = "${RELEASE_TAG#v}" ] \
+            || exit 1
+        shell: bash
+
+      # ***
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install package
+        run: pip install $PACKAGE_NAME
+
+      - name: Infer module name
+        run: echo "MODULE_NAME=${PACKAGE_NAME//-/_}" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Load it!
+        run: |
+          python -c "import $MODULE_NAME; print($MODULE_NAME.__version__)"
+        shell: bash
+
+# ***

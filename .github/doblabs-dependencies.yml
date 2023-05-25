@@ -1,0 +1,4 @@
+---
+
+easy-as-pypi: ['doblabs/easy-as-pypi-appdirs', 'doblabs/easy-as-pypi-appdirs']
+easy-as-pypi-appdirs: ['foo', 'bar']
